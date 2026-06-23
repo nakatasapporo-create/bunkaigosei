@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>かずのぶんかい・　ごうせい</title>
+    <title>かずのごうせいぶんかい</title>
     <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* タッチデバイスでの意図しない画面揺れを防ぐ */
+        /* タッチデバイスでの不要なスクロールや拡大縮小のズレを防止 */
         body {
             touch-action: manipulation;
             font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
-            background-color: #f7f9fa;
+            background-color: #f4f9fc;
         }
-        /* ゆったりしたアニメーション */
+        /* 正解時のアニメーション */
         .bounce-animation {
             animation: bounce 0.5s ease infinite alternate;
         }
@@ -21,86 +21,101 @@
             0% { transform: translateY(0); }
             100% { transform: translateY(-8px); }
         }
+        /* タップした時におはじきが少し弾むアニメーション */
+        .pop-active {
+            animation: popIcon 0.15s ease-out;
+        }
+        @keyframes popIcon {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-between p-4 md:p-6 select-none">
+<body class="min-h-screen flex flex-col items-center justify-between p-3 md:p-6 select-none">
 
-    <!-- ヘッダー -->
-    <header class="w-full max-w-4xl text-center my-2">
-        <h1 class="text-3xl md:text-4xl font-black text-indigo-600 tracking-wider">
-            🎈 かずのぶんかいとごうせい 🎈
-        </h1>
-        <p class="text-sm md:text-base text-gray-500 mt-1">
-            おはじきを 動かしたり タップして あそぼう！
-        </p>
+    <!-- ヘッダーと最大化ボタン -->
+    <header class="w-full max-w-4xl flex items-center justify-between my-2 px-2">
+        <div class="text-left">
+            <h1 class="text-2xl md:text-4xl font-black text-indigo-600 tracking-wider">
+                🎈 かずの ごうせい と ぶんかい 🎈
+            </h1>
+            <p class="text-xs md:text-sm text-gray-500 mt-1">
+                おはじきを １、２、３ と かぞえてみよう！
+            </p>
+        </div>
+        
+        <!-- 全画面表示切り替えボタン -->
+        <button id="btn-fullscreen" onclick="toggleFullscreen()" class="flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-300 hover:border-indigo-400 text-slate-700 hover:text-indigo-600 rounded-xl font-bold text-sm shadow-sm active:scale-95 transition-all">
+            <span id="fs-icon">🖥️</span>
+            <span id="fs-text">がめんを おおきくする</span>
+        </button>
     </header>
 
     <!-- メインコンテンツ -->
-    <main class="w-full max-w-4xl bg-white rounded-3xl shadow-xl p-4 md:p-8 flex flex-col gap-6 flex-grow">
+    <main class="w-full max-w-4xl bg-white rounded-3xl shadow-xl p-4 md:p-8 flex flex-col gap-5 flex-grow">
         
         <!-- モード選択 & 目標数選択 -->
         <div class="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
             <!-- 学習モード切り替え -->
             <div class="flex bg-slate-100 p-1 rounded-2xl w-full sm:w-auto">
                 <button id="btn-mode-split" onclick="changeMode('split')" class="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl font-bold text-sm transition-all bg-indigo-600 text-white shadow-md">
-                    ✂️ いくつといくつ (分解)
+                    ✂️ いくつといくつ (ぶんかい)
                 </button>
                 <button id="btn-mode-merge" onclick="changeMode('merge')" class="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl font-bold text-sm transition-all text-slate-600 hover:text-indigo-600">
-                    🤝 あわせていくつ (合成)
+                    🤝 あわせていくつ (ごうせい)
                 </button>
             </div>
 
             <!-- ターゲット数（レベル） -->
             <div class="flex items-center gap-2 overflow-x-auto py-1 w-full sm:w-auto scrollbar-none">
-                <span class="text-sm font-bold text-slate-600 whitespace-nowrap">いくつにする？</span>
+                <span class="text-sm font-bold text-slate-600 whitespace-nowrap">いくつかぞえる？</span>
                 <div class="flex gap-1">
                     <button class="target-btn px-4 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-lg font-bold text-lg active:scale-95 transition-transform" onclick="setTargetNumber(5)">5</button>
                     <button class="target-btn px-4 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-lg font-bold text-lg active:scale-95 transition-transform" onclick="setTargetNumber(6)">6</button>
                     <button class="target-btn px-4 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-lg font-bold text-lg active:scale-95 transition-transform" onclick="setTargetNumber(7)">7</button>
                     <button class="target-btn px-4 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-lg font-bold text-lg active:scale-95 transition-transform" onclick="setTargetNumber(8)">8</button>
                     <button class="target-btn px-4 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-lg font-bold text-lg active:scale-95 transition-transform" onclick="setTargetNumber(9)">9</button>
-                    <button class="target-btn px-4 py-2 bg-indigo-600 text-white rounded-lg font-bold text-xl scale-105 active:scale-95 transition-transform" id="btn-target-10" onclick="setTargetNumber(10)">10</button>
+                    <button class="target-btn px-6 py-2 bg-indigo-600 text-white rounded-lg font-bold text-xl scale-105 active:scale-95 transition-transform" id="btn-target-10" onclick="setTargetNumber(10)">10</button>
                 </div>
             </div>
         </div>
 
         <!-- 式表示エリア -->
         <div class="flex items-center justify-center gap-4 text-4xl md:text-6xl font-black text-slate-700 bg-amber-50 rounded-2xl py-6 border-2 border-amber-200 shadow-inner">
-            <!-- 分解モード: 10 は [ ] と 4 -->
-            <!-- 合成モード: [ ] と 4 で 10 -->
-            <div id="formula-container" class="flex items-center justify-center gap-3 md:gap-6 flex-wrap">
-                <!-- 動的に書き換えられます -->
+            <div id="formula-container" class="flex items-center justify-center gap-2 md:gap-5 flex-wrap">
+                <!-- 動的に数式が生成されます -->
             </div>
         </div>
 
-        <!-- おはじき操作エリア（一番直感的で大事な場所） -->
-        <div class="flex flex-col items-center bg-slate-50 p-4 rounded-2xl border border-slate-200">
-            <p class="text-sm text-slate-500 font-bold mb-3" id="hint-text">
-                おはじきを タップして べつのおさらに うつしてみよう！
+        <!-- おはじき表示エリア -->
+        <div class="flex flex-col items-center bg-slate-50 p-6 rounded-2xl border border-slate-200">
+            <p class="text-sm text-slate-500 font-bold mb-4" id="hint-text">
+                おはじきを タップすると ぽん！と はねるよ。かぞえてみよう！
             </p>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-                <!-- 左側のお皿 / あるいは元のお皿 -->
-                <div id="plate-left" class="bg-blue-50 border-4 border-dashed border-blue-200 rounded-2xl p-4 min-h-[160px] flex flex-wrap gap-3 items-center justify-center transition-all">
-                    <!-- おはじきが入ります -->
+                <!-- 左側のお皿 -->
+                <div class="flex flex-col items-center">
+                    <span class="text-sm font-bold text-blue-500 mb-1">あおい おさら</span>
+                    <div id="plate-left" class="w-full bg-blue-50 border-4 border-dashed border-blue-200 rounded-2xl p-4 min-h-[160px] flex flex-wrap gap-3 items-center justify-center">
+                        <!-- おはじきが固定で並びます -->
+                    </div>
                 </div>
 
-                <!-- 右側のお皿 / 分かれた先のお皿 -->
-                <div id="plate-right" class="bg-rose-50 border-4 border-dashed border-rose-200 rounded-2xl p-4 min-h-[160px] flex flex-wrap gap-3 items-center justify-center transition-all">
-                    <!-- おはじきが入ります -->
+                <!-- 右側のお皿 -->
+                <div class="flex flex-col items-center">
+                    <span class="text-sm font-bold text-rose-500 mb-1">あかい おさら</span>
+                    <div id="plate-right" class="w-full bg-rose-50 border-4 border-dashed border-rose-200 rounded-2xl p-4 min-h-[160px] flex flex-wrap gap-3 items-center justify-center">
+                        <!-- おはじきが固定で並びます -->
+                    </div>
                 </div>
-            </div>
-
-            <!-- お皿ごとの数を可視化 -->
-            <div class="grid grid-cols-2 gap-6 w-full text-center mt-2 text-xl font-extrabold text-slate-500">
-                <div>あおい おさら: <span id="count-left" class="text-blue-600 text-3xl">0</span></div>
-                <div>あかい おさら: <span id="count-right" class="text-rose-600 text-3xl">0</span></div>
             </div>
         </div>
 
         <!-- 回答エリア（数字カードを選択する） -->
         <div class="flex flex-col items-center gap-3">
-            <span class="text-lg font-bold text-slate-600" id="choice-label">あてはまる すうじを えらんでね！</span>
+            <span class="text-lg font-bold text-slate-600" id="choice-label">？ にはいる すうじを えらんでね！</span>
             <div id="choices-container" class="flex flex-wrap justify-center gap-3">
                 <!-- すうじボタンが自動生成されます -->
             </div>
@@ -127,8 +142,7 @@
         let targetNumber = 10;      // 目標の数字
         let leftCount = 0;         // 左側のお皿のおはじき数
         let rightCount = 0;        // 右側のお皿のおはじき数
-        let questionValue = 0;     // 出題に使う基準値
-        let hidePosition = 'left';  // 隠す部分 ('left' = ひだり, 'right' = みぎ, 'target' = 合成時の目標)
+        let hidePosition = 'left';  // 隠す部分 ('left', 'right', 'target')
         let correctAnswer = 0;     // 正解の数字
         let isSolved = false;      // 正解済みかどうか
 
@@ -145,8 +159,7 @@
                 osc.type = type;
                 osc.frequency.value = freq;
                 
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                // 滑らかに音を消す
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
                 
                 osc.connect(gain);
@@ -155,7 +168,7 @@
                 osc.start();
                 osc.stop(audioCtx.currentTime + duration);
             } catch (e) {
-                console.log("Audio play blocked or unsupported");
+                console.log("Audio play blocked");
             }
         }
 
@@ -163,7 +176,7 @@
             playTone(523.25, 0.15, 'triangle'); // ド
             setTimeout(() => playTone(659.25, 0.15, 'triangle'), 100); // ミ
             setTimeout(() => playTone(783.99, 0.15, 'triangle'), 200); // ソ
-            setTimeout(() => playTone(1046.50, 0.3, 'triangle'), 300); // 高いド
+            setTimeout(() => playTone(1046.50, 0.35, 'triangle'), 300); // 高いド
         }
 
         function playWrongSound() {
@@ -172,34 +185,33 @@
         }
 
         function playPopSound() {
-            playTone(800, 0.05, 'sine');
+            // おはじきを数えるときの軽快なポッという音
+            playTone(900, 0.08, 'sine');
         }
 
         // --- 音声合成（Web Speech API） ---
         function speakText(text) {
             if ('speechSynthesis' in window) {
-                // 実行中の音声をキャンセル
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'ja-JP';
-                utterance.rate = 1.0; // ゆっくり
-                utterance.pitch = 1.1; // やや高めで聴きやすく
+                utterance.rate = 1.0; // 聞き取りやすい標準速度
+                utterance.pitch = 1.1; // 少し明るい声色
                 window.speechSynthesis.speak(utterance);
             }
         }
 
-        // --- 初期化と設定の更新 ---
+        // --- 初期設定 ---
         window.onload = () => {
-            setTargetNumber(10); // デフォルト10
+            setTargetNumber(10); // 初期値は10
         };
 
         function setTargetNumber(num) {
             targetNumber = num;
-            // ボタンのアクティブ状態を変更
             document.querySelectorAll('.target-btn').forEach(btn => {
                 btn.className = "target-btn px-4 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-lg font-bold text-lg active:scale-95 transition-transform";
             });
-            event.target.className = "target-btn px-5 py-2.5 bg-indigo-600 text-white rounded-lg font-bold text-xl scale-105 active:scale-95 transition-transform shadow-md";
+            event.target.className = "target-btn px-6 py-2 bg-indigo-600 text-white rounded-lg font-bold text-xl scale-105 active:scale-95 transition-transform shadow-md";
             
             initGame();
         }
@@ -219,27 +231,23 @@
             initGame();
         }
 
-        // --- ゲームの構築 ---
+        // --- ゲーム開始 ---
         function initGame() {
             isSolved = false;
             document.getElementById('feedback-panel').classList.add('hidden');
             
-            // 問題となるお皿の数をセット
-            // 分解：おはじきの総数は targetNumber に固定。左右をランダムに分ける
-            // 合成：おはじきの総数は targetNumber に固定。左右をランダムに分ける
+            // ランダムに左右の数を切り分ける
             leftCount = Math.floor(Math.random() * (targetNumber - 1)) + 1; // 1以上 target-1以下
             rightCount = targetNumber - leftCount;
 
-            // 隠す部分（クイズ）の決定
+            // クイズ形式に合わせて、どこを隠す（正解にする）か決定
             if (currentMode === 'split') {
-                // 分解モード：左か右のどちらか一方を隠す
                 hidePosition = Math.random() > 0.5 ? 'left' : 'right';
                 correctAnswer = (hidePosition === 'left') ? leftCount : rightCount;
             } else {
-                // 合成モード：目標数か、左右のどこかを隠す
                 const r = Math.random();
                 if (r < 0.4) {
-                    hidePosition = 'target'; // 合計値を当てる
+                    hidePosition = 'target'; // 合計
                     correctAnswer = targetNumber;
                 } else if (r < 0.7) {
                     hidePosition = 'left';
@@ -256,37 +264,25 @@
             announceQuestion();
         }
 
-        // --- 数式表示の更新 ---
+        // --- 式の作成 ---
         function renderFormula() {
             const container = document.getElementById('formula-container');
             container.innerHTML = '';
 
             if (currentMode === 'split') {
-                // [全体(target)] は [左] と [右]
-                const tBox = createNumBox(targetNumber, false);
-                const isWord = createWordSpan('は');
-                const lBox = createNumBox(leftCount, hidePosition === 'left');
-                const andWord = createWordSpan('と');
-                const rBox = createNumBox(rightCount, hidePosition === 'right');
-
-                container.appendChild(tBox);
-                container.appendChild(isWord);
-                container.appendChild(lBox);
-                container.appendChild(andWord);
-                container.appendChild(rBox);
+                // 例：10 は [？] と 4
+                container.appendChild(createNumBox(targetNumber, false));
+                container.appendChild(createWordSpan('は'));
+                container.appendChild(createNumBox(leftCount, hidePosition === 'left'));
+                container.appendChild(createWordSpan('と'));
+                container.appendChild(createNumBox(rightCount, hidePosition === 'right'));
             } else {
-                // [左] と [右] で [全体(target)]
-                const lBox = createNumBox(leftCount, hidePosition === 'left');
-                const andWord = createWordSpan('と');
-                const rBox = createNumBox(rightCount, hidePosition === 'right');
-                const doneWord = createWordSpan('で');
-                const tBox = createNumBox(targetNumber, hidePosition === 'target');
-
-                container.appendChild(lBox);
-                container.appendChild(andWord);
-                container.appendChild(rBox);
-                container.appendChild(doneWord);
-                container.appendChild(tBox);
+                // 例：6 と [？] で 10
+                container.appendChild(createNumBox(leftCount, hidePosition === 'left'));
+                container.appendChild(createWordSpan('と'));
+                container.appendChild(createNumBox(rightCount, hidePosition === 'right'));
+                container.appendChild(createWordSpan('で'));
+                container.appendChild(createNumBox(targetNumber, hidePosition === 'target'));
             }
         }
 
@@ -295,7 +291,7 @@
             box.className = "flex items-center justify-center px-6 py-4 rounded-2xl min-w-[80px] h-[80px] shadow-sm font-black text-5xl transition-all duration-300";
             if (isHidden) {
                 box.id = "missing-box";
-                box.className += " bg-yellow-100 border-4 border-dashed border-yellow-400 text-yellow-600 animate-pulse cursor-pointer";
+                box.className += " bg-yellow-100 border-4 border-dashed border-yellow-400 text-yellow-600 animate-pulse";
                 box.textContent = "？";
             } else {
                 box.className += " bg-white border-2 border-slate-300 text-slate-800";
@@ -306,40 +302,33 @@
 
         function createWordSpan(text) {
             const span = document.createElement('span');
-            span.className = "text-2xl md:text-3xl text-slate-500 font-bold mx-1";
+            span.className = "text-xl md:text-3xl text-slate-500 font-bold mx-0.5";
             span.textContent = text;
             return span;
         }
 
-        // --- おはじきお皿の更新（ドラッグ操作のシミュレートタップ含む） ---
+        // --- お皿のおはじき設置（今回は固定、クリックでバウンドのみ） ---
         function renderPlates() {
             const plateLeft = document.getElementById('plate-left');
             const plateRight = document.getElementById('plate-right');
-            const countLeftSpan = document.getElementById('count-left');
-            const countRightSpan = document.getElementById('count-right');
 
             plateLeft.innerHTML = '';
             plateRight.innerHTML = '';
 
-            countLeftSpan.textContent = leftCount;
-            countRightSpan.textContent = rightCount;
-
-            // 左側のおはじき（青い星）
+            // 左：青い星（タップすると跳ねて数えやすい）
             for (let i = 0; i < leftCount; i++) {
-                const bead = createBead('blue', 'left');
-                plateLeft.appendChild(bead);
+                plateLeft.appendChild(createFixedBead('blue'));
             }
 
-            // 右側のおはじき（赤いりんご）
+            // 右：赤いりんご（タップすると跳ねて数えやすい）
             for (let i = 0; i < rightCount; i++) {
-                const bead = createBead('red', 'right');
-                plateRight.appendChild(bead);
+                plateRight.appendChild(createFixedBead('red'));
             }
         }
 
-        function createBead(color, currentPlate) {
+        function createFixedBead(color) {
             const bead = document.createElement('button');
-            bead.className = "w-14 h-14 md:w-16 md:h-16 flex items-center justify-center text-4xl rounded-full shadow-md active:scale-95 transition-transform duration-100 focus:outline-none";
+            bead.className = "w-14 h-14 md:w-16 md:h-16 flex items-center justify-center text-4xl rounded-full shadow-md transition-transform duration-100 focus:outline-none";
             
             if (color === 'blue') {
                 bead.textContent = '⭐';
@@ -349,35 +338,24 @@
                 bead.className += " bg-rose-100 border-2 border-rose-400 hover:bg-rose-200";
             }
 
-            // タップでおはじきを別のお皿に移す（一番簡単で間違いのない移動方法）
-            bead.onclick = () => {
-                if (isSolved) return;
+            // タップアクション：位置は変えずに、その場で跳ねるアニメーションをつけて数えやすくする
+            bead.onclick = (e) => {
                 playPopSound();
-                if (currentPlate === 'left') {
-                    leftCount--;
-                    rightCount++;
-                } else {
-                    leftCount++;
-                    rightCount--;
-                }
-                
-                // 数式とお皿をリアルタイム更新
-                renderPlates();
-                // ※ 現在のクイズの正解が「ユーザーがおはじきをどうわけたか」に引っ張られると混乱するため、
-                // 問題作成時に決定した correctAnswer と比べるための基準値が変更されているかを自動判定。
-                // 児童がおはじきを操作して答えを探せるように、式を再表示
-                renderFormula();
+                bead.classList.add('pop-active');
+                // アニメーションが終わったらクラスを削除
+                setTimeout(() => {
+                    bead.classList.remove('pop-active');
+                }, 150);
             };
 
             return bead;
         }
 
-        // --- 選択肢ボタンの自動生成 ---
+        // --- 選択肢の描画 ---
         function renderChoices() {
             const container = document.getElementById('choices-container');
             container.innerHTML = '';
 
-            // 0から targetNumber までのボタンを出す
             for (let i = 0; i <= targetNumber; i++) {
                 const btn = document.createElement('button');
                 btn.className = "w-16 h-16 md:w-20 md:h-20 bg-amber-400 hover:bg-amber-500 text-slate-800 text-3xl font-extrabold rounded-2xl shadow-md border-b-4 border-amber-600 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center";
@@ -387,14 +365,14 @@
             }
         }
 
-        // --- 音声解説文の生成と再生 ---
+        // --- 音声での問題読み上げ ---
         function announceQuestion() {
             let message = "";
             if (currentMode === 'split') {
                 if (hidePosition === 'left') {
-                    message = `${targetNumber}は、いくつと、${rightCount}かな？`;
+                    message = `${targetNumber}は、いくつと、${rightCount}かな？ おさらのおはじきを かぞえてみてね。`;
                 } else {
-                    message = `${targetNumber}は、${leftCount}と、いくつかな？`;
+                    message = `${targetNumber}は、${leftCount}と、いくつかな？ おさらのおはじきを かぞえてみてね。`;
                 }
             } else {
                 if (hidePosition === 'target') {
@@ -408,7 +386,7 @@
             speakText(message);
         }
 
-        // --- 判定処理 ---
+        // --- 答え合わせ ---
         function selectAnswer(num) {
             if (isSolved) return;
 
@@ -423,29 +401,26 @@
             isSolved = true;
             playSuccessSound();
 
-            // 数式の？ボックスを正解の数字に書き換え
             const missingBox = document.getElementById('missing-box');
             if (missingBox) {
                 missingBox.textContent = correctAnswer;
                 missingBox.className = "flex items-center justify-center px-6 py-4 rounded-2xl min-w-[80px] h-[80px] shadow-sm font-black text-5xl bg-emerald-100 border-4 border-emerald-400 text-emerald-600";
             }
 
-            // お祝い表示
             const feedbackPanel = document.getElementById('feedback-panel');
             const feedbackText = document.getElementById('feedback-text');
             feedbackPanel.classList.remove('hidden');
 
             let congratulationText = "";
             if (currentMode === 'split') {
-                congratulationText = `せいかい！ ${targetNumber} は ${leftCount} と ${rightCount} に わけられるね！`;
+                congratulationText = `せいかい！ ${targetNumber} は ${leftCount} と ${rightCount} だね！すごい！`;
             } else {
-                congratulationText = `せいかい！ ${leftCount} と ${rightCount} を あわせると ${targetNumber} だね！`;
+                congratulationText = `せいかい！ ${leftCount} と ${rightCount} を あわせると ${targetNumber} だね！素晴らしい！`;
             }
 
             feedbackText.textContent = `🎉 せいかい！ ${leftCount} と ${rightCount} で ${targetNumber}！ 🎉`;
             speakText(congratulationText);
 
-            // 3.5秒後に次の問題へ
             setTimeout(() => {
                 initGame();
             }, 3500);
@@ -453,15 +428,36 @@
 
         function handleIncorrect() {
             playWrongSound();
-            speakText("ちがうよ、もう一回考えてみてね");
+            speakText("ちがうよ、お皿のおはじきをもう一回かぞえてみてね");
             
-            // ちょっとした揺れるアニメーションを式に入れる
             const missingBox = document.getElementById('missing-box');
             if (missingBox) {
                 missingBox.classList.add('bg-rose-100', 'border-rose-400', 'text-rose-600');
                 setTimeout(() => {
                     missingBox.classList.remove('bg-rose-100', 'border-rose-400', 'text-rose-600');
                 }, 800);
+            }
+        }
+
+        // --- 最大化（フルスクリーン）の制御 ---
+        function toggleFullscreen() {
+            const fsText = document.getElementById('fs-text');
+            const fsIcon = document.getElementById('fs-icon');
+            
+            if (!document.fullscreenElement) {
+                // フルスクリーンにする
+                document.documentElement.requestFullscreen().then(() => {
+                    fsText.textContent = "画面を元に戻す";
+                    fsIcon.textContent = "📴";
+                }).catch(err => {
+                    console.log("フルスクリーンエラー:", err);
+                });
+            } else {
+                // フルスクリーンを解除する
+                document.exitFullscreen().then(() => {
+                    fsText.textContent = "がめんを おおきくする";
+                    fsIcon.textContent = "🖥️";
+                });
             }
         }
     </script>
