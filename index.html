@@ -4,8 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>かずのごうせいぶんかい</title>
-    <!-- Tailwind CSS (CDN) -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="description" content="おはじきを数えて、数の合成と分解を楽しく学ぶアプリです。">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="かずのがくしゅう">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="icon" type="image/png" href="./icons/icon-192.png">
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./pwa.js" defer></script>
     <style>
         /* タッチデバイスでの不要なスクロールや拡大縮小のズレを防止 */
         body {
@@ -51,6 +59,19 @@
             <span id="fs-text">がめんを おおきくする</span>
         </button>
     </header>
+
+    <section class="pwa-tools" aria-label="アプリの設定">
+        <p id="pwa-status" role="status" aria-live="polite">オフラインの準備をしています…</p>
+        <div class="pwa-actions">
+            <button id="pwa-install" type="button" hidden>ホーム画面に追加</button>
+            <button id="pwa-update" type="button" hidden>最新版に更新</button>
+            <details id="pwa-help">
+                <summary>ホーム画面に追加する方法</summary>
+                <p>iPhone・iPad：Safariの共有メニューから「ホーム画面に追加」を選びます。<br>
+                Android・パソコン：ブラウザーのメニューから「アプリをインストール」などを選びます。</p>
+            </details>
+        </div>
+    </section>
 
     <!-- メインコンテンツ -->
     <main class="w-full max-w-4xl bg-white rounded-3xl shadow-xl p-4 md:p-8 flex flex-col gap-5 flex-grow">
@@ -211,7 +232,9 @@
             document.querySelectorAll('.target-btn').forEach(btn => {
                 btn.className = "target-btn px-4 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-lg font-bold text-lg active:scale-95 transition-transform";
             });
-            event.target.className = "target-btn px-6 py-2 bg-indigo-600 text-white rounded-lg font-bold text-xl scale-105 active:scale-95 transition-transform shadow-md";
+            const selectedButton = Array.from(document.querySelectorAll('.target-btn'))
+                .find(btn => Number(btn.textContent) === num);
+            if (selectedButton) selectedButton.className = "target-btn px-6 py-2 bg-indigo-600 text-white rounded-lg font-bold text-xl scale-105 active:scale-95 transition-transform shadow-md";
             
             initGame();
         }
@@ -446,6 +469,10 @@
             
             if (!document.fullscreenElement) {
                 // フルスクリーンにする
+                if (!document.documentElement.requestFullscreen) {
+                    fsText.textContent = "この端末は全画面表示に未対応です";
+                    return;
+                }
                 document.documentElement.requestFullscreen().then(() => {
                     fsText.textContent = "画面を元に戻す";
                     fsIcon.textContent = "📴";
@@ -460,8 +487,11 @@
                 });
             }
         }
+        document.addEventListener('fullscreenchange', () => {
+            document.getElementById('fs-text').textContent = document.fullscreenElement
+                ? "画面を元に戻す" : "がめんを おおきくする";
+            document.getElementById('fs-icon').textContent = document.fullscreenElement ? "📴" : "🖥️";
+        });
     </script>
 </body>
 </html>
-
-```
